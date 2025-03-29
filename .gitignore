@@ -1,0 +1,6 @@
+key.txt
+token.txt
+pyvenv.cfg
+Lib/
+Scripts/
+Include/

@@ -2,14 +2,10 @@
 
 from data_sender import DataSender, DataReading
 from random import uniform, random
-import asyncio
 from multiprocessing import Process
 
-API_ENDPOINT = "http://localhost:3000/api"
-EXTERNAL_READINGS_FILE = "./external-readings.csv"
-INTERNAL_READINGS_FILE = "./internal-readings.csv"
-KEY_FILE_LOCATION = "./key.txt"
-TOKEN_FILE_LOCATION = "./token.txt"
+from control_variables import API_ENDPOINT, INTERNAL_READINGS_FILE, EXTERNAL_READINGS_FILE
+from utils import get_device_key
 
 API_ENDPOINTS = {
     "LOAD_EXTERNAL_READING": f"{API_ENDPOINT}/load-external-reading",
@@ -53,8 +49,8 @@ class InternalReading(DataReading):
         }
 
 class ExternalSender(DataSender[ExternalReading]):
-    def __init__(self):
-        super().__init__(EXTERNAL_READINGS_FILE, API_ENDPOINTS["LOAD_EXTERNAL_READING"], 10, 5)
+    def __init__(self, key: str):
+        super().__init__(key, EXTERNAL_READINGS_FILE, API_ENDPOINTS["LOAD_EXTERNAL_READING"], 10, 5)
     
     def make_reading(self, *args):
         return ExternalReading(*args)
@@ -69,8 +65,8 @@ class ExternalSender(DataSender[ExternalReading]):
         )
 
 class InternalSender(DataSender[InternalReading]):
-    def __init__(self):
-        super().__init__(INTERNAL_READINGS_FILE, API_ENDPOINTS["LOAD_INTERNAL_READING"], 5, 3)
+    def __init__(self, key: str):
+        super().__init__(key, INTERNAL_READINGS_FILE, API_ENDPOINTS["LOAD_INTERNAL_READING"], 3, 3)
     
     def make_reading(self, *args):
         return InternalReading(*args)
@@ -79,12 +75,17 @@ class InternalSender(DataSender[InternalReading]):
         return InternalReading(uniform(0, 32), random())
 
 if __name__ == '__main__':
-    external_sender = ExternalSender()
-    internal_sender = InternalSender()
+    try:
+        key = get_device_key()
+    except Exception as e:
+        print("The device key was corrupted")
+
+    external_sender = ExternalSender(key)
+    internal_sender = InternalSender(key)
 
     first_process = Process(target = external_sender._main)
     second_process = Process(target = internal_sender._main)
-    
+
     try:
         first_process.start()
         second_process.start()

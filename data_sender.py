@@ -1,10 +1,9 @@
 import datetime as dt
 import abc
-import json
-import time
-import requests
+import aiohttp
 from typing import TypeVar, Generic
 import asyncio
+from utils import dates_differ
 
 class DataReading:
     @abc.abstractmethod
@@ -22,11 +21,12 @@ class DataReading:
 
 T = TypeVar("T", bound=DataReading)
 class DataSender(Generic[T]):
-    def __init__(self, readings_file: str, api_endpoint: str, sending_interval: int, reading_interval: int):
+    def __init__(self, key: str, readings_file: str, api_endpoint: str, sending_interval: int, reading_interval: int):
         '''
         @param sending_interval The number of minutes required to send data summaries to the database
         @param readint_interval The number of seconds to use to make sensor readings
         '''
+        self.key = key
         self.readings_file = readings_file
         self.api_endpoint = api_endpoint
         self.time_of_last_summary = None
@@ -58,40 +58,37 @@ class DataSender(Generic[T]):
             readings_file.write(reading.serialize())
 
     def create_summary(self) -> T:
-        with open(self.readings_file, "r") as readings_file:
+        with open(self.readings_file, "r+") as readings_file:
             readings = [ self.deserialize_reading(reading) for reading in readings_file.readlines() ]
             count = len(readings)
 
             components = list(zip(*[ reading.to_tuple() for reading in readings ]))
             components = [ sum(component_list) / count for component_list in components ]
             summary = self.make_reading(*components)
-            # readings_file.truncate(0)
+            readings_file.truncate(0)
 
             return summary
     
     async def send_summary(self):
         reading = self.create_summary()
         json_payload = reading.to_json()
-        json_payload["timestamp"] = str(dt.datetime.now())
+        json_payload["datetime"] = str(dt.datetime.now())
 
-        response = requests.post(
-            self.api_endpoint,
-            json = json_payload
-        )
-
-        if not response.ok:
-            json_response = json.loads(response.content.decode())
-            if json_response["error"] == "Unactive device":
-                raise BaseException("The device has been deactivated")
-            else:
-                print(json_response)
-        else:
-            print(f"{str(dt.datetime.now())}. The summary was successfully sent")
+        async with aiohttp.ClientSession() as session:
+            async with session.post(self.api_endpoint, json = json_payload, headers = { "Authorization": f"Bearer {self.key}" }) as response:
+                if response.status != 200:
+                    json_response = await response.json()
+                    if json_response.get("error") == "Unactive device":
+                        raise BaseException("The device has been deactivated")
+                    else:
+                        print(json_response)
+                else:
+                    print(f"{str(dt.datetime.now())}. The summary was successfully sent")
 
     async def main(self):
         while True:
             current_time = dt.datetime.now()
-            if current_time.minute % self.sending_interval == 0 and self.time_of_last_summary != current_time:
+            if current_time.minute % self.sending_interval == 0 and dates_differ(self.time_of_last_summary, current_time):
                 self.time_of_last_summary = current_time
                 await self.send_summary()
             self.save_reading(self.read_data())
@@ -99,3 +96,4 @@ class DataSender(Generic[T]):
     
     def _main(self):
         asyncio.run(self.main())
+    

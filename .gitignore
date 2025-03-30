@@ -4,3 +4,5 @@ pyvenv.cfg
 Lib/
 Scripts/
 Include/
+internal-readings.csv
+external-readings.csv

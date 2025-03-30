@@ -6,3 +6,4 @@ Scripts/
 Include/
 internal-readings.csv
 external-readings.csv
+__pycache__/

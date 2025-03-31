@@ -13,24 +13,20 @@ API_ENDPOINTS = {
 }
 
 class ExternalReading(DataReading):
-    def __init__(self, temperature: float, light: float, current: float, voltage: float, wattage: float):
+    def __init__(self, temperature: float, light: float, current: float):
         super().__init__()
         self.temperature = temperature
         self.light = light
         self.current = current
-        self.voltage = voltage
-        self.wattage = wattage
 
     def to_tuple(self):
-        return ( self.temperature, self.light, self.current, self.voltage, self.wattage )
+        return ( self.temperature, self.light, self.current )
     
     def to_json(self):
         return {
             "temperature": self.temperature,
             "light": self.light,
             "current": self.current,
-            "voltage": self.voltage,
-            "wattage": self.wattage,
         }
 
 class InternalReading(DataReading):

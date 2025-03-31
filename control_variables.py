@@ -1,4 +1,4 @@
-API_ENDPOINT = "http://localhost:3000/api"
+API_ENDPOINT = "http://localhost:3000/api/device"
 EXTERNAL_READINGS_FILE = "./external-readings.csv"
 INTERNAL_READINGS_FILE = "./internal-readings.csv"
 KEY_FILE_LOCATION = "./key.txt"

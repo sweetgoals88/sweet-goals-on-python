@@ -92,6 +92,7 @@ class DataSender(Generic[T]):
                     json_response = await response.json()
                     if json_response.get("error") == "Unactive device":
                         raise BaseException("The device has been deactivated")
+                    raise BaseException("Couldn't send summary to the database")
 
     async def _main(self):
         while True:
@@ -100,8 +101,11 @@ class DataSender(Generic[T]):
                 self.time_of_last_summary = current_time
 
                 self.log_message("Sending summary of readings to the database")
-                await self.send_summary()
-                self.log_message("The summary was successfully sent")
+                try: 
+                    await self.send_summary()
+                    self.log_message("The summary was successfully sent")
+                except Exception as exception:
+                    self.log_message(str(exception))
             
             self.log_message("Reading data")
             reading = self.read_data()

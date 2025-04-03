@@ -7,7 +7,7 @@ KEY_FILE_LOCATION = "./key.txt"
 API_ENDPOINTS = {
     "LOAD_EXTERNAL_READING": f"{API_ENDPOINT}/load-external-reading",
     "LOAD_INTERNAL_READING": f"{API_ENDPOINT}/load-internal-reading",
-    "REPORT_OPERATIONAL_STATUS": f"{API_ENDPOINT}/report-operational-status"
+    "REPORT_STATUS": f"{API_ENDPOINT}/report-status"
 }
 
 # Number of seconds between device readings

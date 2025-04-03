@@ -8,3 +8,4 @@ internal-readings.csv
 external-readings.csv
 readings.csv
 __pycache__/
+venv/

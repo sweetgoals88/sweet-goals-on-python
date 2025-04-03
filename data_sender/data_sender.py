@@ -21,7 +21,15 @@ class DataReading:
 
 T = TypeVar("T", bound=DataReading)
 class DataSender(Generic[T]):
-    def __init__(self, key: str, readings_file: str, api_endpoint: str, sending_interval: int, reading_interval: int):
+    def __init__(
+            self, 
+            label: str,
+            key: str, 
+            readings_file: str, 
+            api_endpoint: str, 
+            sending_interval: int, 
+            reading_interval: int
+        ):
         '''
         @param sending_interval The number of minutes required to send data summaries to the database
         @param readint_interval The number of seconds to use to make sensor readings
@@ -69,6 +77,9 @@ class DataSender(Generic[T]):
 
             return summary
     
+    def log_message(self, message: str):
+        print(f"{str(dt.datetime.now())}. {self.label}: {message}")
+
     async def send_summary(self):
         reading = self.create_summary()
         json_payload = reading.to_json()
@@ -80,18 +91,24 @@ class DataSender(Generic[T]):
                     json_response = await response.json()
                     if json_response.get("error") == "Unactive device":
                         raise BaseException("The device has been deactivated")
-                    else:
-                        print(json_response)
-                else:
-                    print(f"{str(dt.datetime.now())}. The summary was successfully sent")
 
     async def _main(self):
         while True:
             current_time = dt.datetime.now()
             if current_time.minute % self.sending_interval == 0 and dates_differ(self.time_of_last_summary, current_time):
                 self.time_of_last_summary = current_time
+
+                self.log_message("Sending summary of readings to the database")
                 await self.send_summary()
-            self.save_reading(self.read_data())
+                self.log_message("The summary was successfully sent")
+            
+            self.log_message("Reading data")
+            reading = self.read_data()
+
+            self.log_message(f"Saving data in file '{self.readings_file}'")
+            self.save_reading(reading)
+
+            self.log_message(f"Waiting for {self.reading_interval} seconds until next reading")
             await asyncio.sleep(self.reading_interval)
     
     def main(self):

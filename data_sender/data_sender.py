@@ -85,7 +85,7 @@ class DataSender(Generic[T]):
                 else:
                     print(f"{str(dt.datetime.now())}. The summary was successfully sent")
 
-    async def main(self):
+    async def _main(self):
         while True:
             current_time = dt.datetime.now()
             if current_time.minute % self.sending_interval == 0 and dates_differ(self.time_of_last_summary, current_time):
@@ -94,6 +94,6 @@ class DataSender(Generic[T]):
             self.save_reading(self.read_data())
             await asyncio.sleep(self.reading_interval)
     
-    def _main(self):
-        asyncio.run(self.main())
+    def main(self):
+        asyncio.run(self._main())
     

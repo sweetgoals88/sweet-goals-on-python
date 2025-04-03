@@ -1,26 +1,50 @@
 #! venv/Scripts/python.exe
 
-from data_sender import DataSender, DataReading
-from random import uniform, random
+import asyncio
 from multiprocessing import Process
 
-from control_variables import API_ENDPOINTS, INTERNAL_READINGS_FILE, EXTERNAL_READINGS_FILE
+import aiohttp
+import time
+
 from utils import get_device_key
-from external_data_collection import ExternalSender
+from data_sender.external_data_collection import ExternalSender
+from data_sender.internal_data_collection import InternalSender
+from control_variables import API_ENDPOINTS, NUMBER_OF_ATTEMPTS_FOR_OPERATIONAL
 
+async def report_operational_status(key):
+    operational_status = None
+    failed_attempts = 0
+    while True:
+        async with aiohttp.ClientSession() as session:
+            print("Trying to connect the device with the database")
 
+            async with session.post(
+                API_ENDPOINTS["REPORT_OPERATIONAL_STATUS"], 
+                headers = { "Authorization": f"Bearer {key}" }
+            ) as response:
+                operational_status = response.status
+                if operational_status == 200:
+                    break
+                
+                failed_attempts += 1
+                if failed_attempts >= NUMBER_OF_ATTEMPTS_FOR_OPERATIONAL:
+                    print("The device couln't connect to the database")
+                    raise BaseException("The device couln't connect to the database")
+                
+                print("Waiting for device to be declared operational. Retrying in two seconds")
+                time.sleep(2)
 
-if __name__ == '__main__':
-    try:
-        key = get_device_key()
-    except Exception as e:
-        print("The device key was corrupted")
+    print("The device is operational")
+
+async def main():
+    key = get_device_key()
+    await report_operational_status(key)
 
     external_sender = ExternalSender(key)
     internal_sender = InternalSender(key)
 
-    first_process = Process(target = external_sender._main)
-    second_process = Process(target = internal_sender._main)
+    first_process = Process(target = external_sender.main)
+    second_process = Process(target = internal_sender.main)
 
     try:
         first_process.start()
@@ -34,3 +58,6 @@ if __name__ == '__main__':
     finally:
         first_process.terminate()
         second_process.terminate()
+
+if __name__ == '__main__':
+    asyncio.run(main())

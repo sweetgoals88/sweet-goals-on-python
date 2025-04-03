@@ -1,11 +1,7 @@
-from data_sender import DataSender, DataReading
-from control_variables import API_ENDPOINTS, INTERNAL_READINGS_FILE
+from data_sender.data_sender import DataSender, DataReading
+from control_variables import API_ENDPOINTS, INTERNAL_READINGS_FILE, INTERNAL_SENDING_INTERVAL, INTERNAL_READING_INTERVAL
 
-import platform
-from random import uniform, random
-
-import adafruit_dht
-import board
+import sensors.dht22 as dht22
 
 class InternalReading(DataReading):
     def __init__(self, temperature: float, humidity: float):
@@ -14,7 +10,7 @@ class InternalReading(DataReading):
         self.humidity = humidity
 
     def to_tuple(self):
-        return ( self.temperature, self.humidity )
+        return (self.temperature, self.humidity)
     
     def to_json(self):
         return {
@@ -24,14 +20,20 @@ class InternalReading(DataReading):
 
 class InternalSender(DataSender[InternalReading]):
     def __init__(self, key: str):
-        super().__init__(key, INTERNAL_READINGS_FILE, API_ENDPOINTS["LOAD_INTERNAL_READING"], 3, 3)
-        self.dht_device = adafruit_dht.DHT22(board.D4)
+        super().__init__(
+            key, 
+            INTERNAL_READINGS_FILE, 
+            API_ENDPOINTS["LOAD_INTERNAL_READING"], 
+            INTERNAL_READING_INTERVAL, 
+            INTERNAL_SENDING_INTERVAL
+        )
+        dht22.prepare_sensor()
     
     def make_reading(self, *args):
         return InternalReading(*args)
     
     def read_data(self):
         return InternalReading(
-            self.dht_device.temperature, 
-            self.dht_device.humidity
+            dht22.read_temperature(),
+            dht22.read_humidity()
         )

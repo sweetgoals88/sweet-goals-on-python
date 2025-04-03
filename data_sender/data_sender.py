@@ -91,9 +91,12 @@ class DataSender(Generic[T]):
             async with session.post(self.api_endpoint, json = json_payload, headers = { "Authorization": f"Bearer {self.key}" }) as response:
                 if response.status != 200:
                     json_response = await response.json()
-                    if json_response.get("error") == "Unactive device":
+                    message = json_response["message"]
+                    error = json_response["error"]
+                    
+                    if message == "Unactive device":
                         raise BaseException("The device has been deactivated")
-                    raise BaseException(f"Couldn't send summary to the database.\n{json_response["message"]}")
+                    raise BaseException(f"Couldn't send summary to the database.\n{message}\n{error}")
 
     async def _main(self):
         while True:

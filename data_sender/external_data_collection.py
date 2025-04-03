@@ -25,6 +25,7 @@ class ExternalReading(DataReading):
 class ExternalSender(DataSender[ExternalReading]):
     def __init__(self, key: str):
         super().__init__(
+            "ExternalReading",
             key, 
             EXTERNAL_READINGS_FILE, 
             API_ENDPOINTS["LOAD_EXTERNAL_READING"], 

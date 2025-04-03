@@ -21,6 +21,7 @@ class InternalReading(DataReading):
 class InternalSender(DataSender[InternalReading]):
     def __init__(self, key: str):
         super().__init__(
+            "InternalReading",
             key, 
             INTERNAL_READINGS_FILE, 
             API_ENDPOINTS["LOAD_INTERNAL_READING"], 

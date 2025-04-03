@@ -4,6 +4,7 @@ import aiohttp
 from typing import TypeVar, Generic
 import asyncio
 from utils import dates_differ
+import json
 
 class DataReading:
     @abc.abstractmethod
@@ -92,7 +93,7 @@ class DataSender(Generic[T]):
                     json_response = await response.json()
                     if json_response.get("error") == "Unactive device":
                         raise BaseException("The device has been deactivated")
-                    raise BaseException("Couldn't send summary to the database")
+                    raise BaseException(f"Couldn't send summary to the database.\n{json_response["message"]}")
 
     async def _main(self):
         while True:

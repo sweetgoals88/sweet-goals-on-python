@@ -34,6 +34,7 @@ class DataSender(Generic[T]):
         @param sending_interval The number of minutes required to send data summaries to the database
         @param readint_interval The number of seconds to use to make sensor readings
         '''
+        self.label = label
         self.key = key
         self.readings_file = readings_file
         self.api_endpoint = api_endpoint

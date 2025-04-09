@@ -57,7 +57,7 @@ async def _read_total_current(
     in order to estimate the total current flow during `total_computation_seconds` seconds
     without having to spend that long reading data.
 
-    It assumes `single_computation_between_seconds * 1000` is a multiple of `milliseconds_between readings`
+    It assumes `single_computation_between_seconds * 1000` is a multiple of `milliseconds_between_readings`
     '''
     single_computation_milliseconds = single_computation_seconds * 1000
     number_of_readings = single_computation_milliseconds // milliseconds_between_readings

@@ -33,7 +33,7 @@ class InternalSender(DataSender[InternalReading]):
     def make_reading(self, *args):
         return InternalReading(*args)
     
-    def read_data(self):
+    async def read_data(self):
         return InternalReading(
             dht22.read_temperature(),
             dht22.read_humidity()

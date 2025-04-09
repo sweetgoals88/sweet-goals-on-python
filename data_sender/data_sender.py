@@ -4,7 +4,6 @@ import aiohttp
 from typing import TypeVar, Generic
 import asyncio
 from utils import dates_differ
-import json
 
 class DataReading:
     @abc.abstractmethod
@@ -44,7 +43,7 @@ class DataSender(Generic[T]):
         self.reading_interval = reading_interval
 
     @abc.abstractmethod
-    def read_data(self) -> T:
+    async def read_data(self) ->  T:
         '''Reads actual data from the sensors'''
         pass
 
@@ -112,7 +111,7 @@ class DataSender(Generic[T]):
                     self.log_message(str(exception))
             
             self.log_message("Reading data")
-            reading = self.read_data()
+            reading = await self.read_data()
 
             self.log_message(f"Saving data in file '{self.readings_file}'")
             self.save_reading(reading)

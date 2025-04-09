@@ -64,6 +64,7 @@ def read_light(address = DEVICE):
     '''
     Reads light from the BH1750 sensor in lux
     '''
+    data: float = 0
     try:
         data = BUS.read_i2c_block_data(address, CONTINUOUS_HIGH_RES_MODE_2)
     except IOError as error:

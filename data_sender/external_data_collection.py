@@ -4,6 +4,7 @@ from random import uniform
 
 import sensors.bh1750 as bh1750
 import sensors.ds18b20 as ds18b20
+import sensors.sct_013 as sct_013
 
 class ExternalReading(DataReading):
     def __init__(self, temperature: float, light: float, current: float):
@@ -35,13 +36,15 @@ class ExternalSender(DataSender[ExternalReading]):
 
         ds18b20.prepare_sensor()
         bh1750.prepare_sensor()
+        sct_013.prepare_sensor()
     
     def make_reading(self, *args):
         return ExternalReading(*args)
 
-    def read_data(self):
+    async def read_data(self):
+        current = await sct_013.read_total_current()
         return ExternalReading(
             ds18b20.read_temperature(),
             bh1750.read_light(),
-            uniform(0, 100),
+            current,
         )

@@ -28,6 +28,6 @@ def read_temperature():
 
 def read_humidity():
     '''
-    Gets the humidity of the DHT22 sensor in percentage
+    Gets the relative humidity of the DHT22 sensor in percentage
     '''
     return DHT_DEVICE.humidity

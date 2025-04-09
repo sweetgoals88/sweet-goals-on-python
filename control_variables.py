@@ -25,3 +25,9 @@ EXTERNAL_SENDING_INTERVAL = 15
 # Number of times the device can try to connect to the database (i. e., reporting
 # itself as operational) before shutting down
 NUMBER_OF_ATTEMPTS_FOR_OPERATIONAL = 5
+
+# Time used to compute the total current (Irms) read by the SCT
+SECONDS_TO_READ_CURRENT = 1
+
+# Time ellapsed between individual SCT readings when computing the total current (Irms)
+MILLISECONDS_TO_READ_CURRENT = 10

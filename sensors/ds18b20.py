@@ -29,10 +29,9 @@ def prepare_sensor():
     DEVICE_FILE = device_folder + '/w1_slave'
 
 def _read_raw_temperature():
-    f = open(DEVICE_FILE, 'r')
-    lines = f.readlines()
-    f.close()
-    return lines
+    with open(DEVICE_FILE, 'r') as file:
+        lines = file.readlines()
+        return lines
 
 def read_temperature():
     '''

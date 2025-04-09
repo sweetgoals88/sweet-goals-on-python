@@ -55,7 +55,7 @@ async def main():
             MILLISECONDS_BETWEEN_READINGS
         )
         print(f"{str(dt.datetime.now())}. Current: {current:.2f} A")
-        await asyncio.sleep(1)
+        await asyncio.sleep(TOTAL_COMPUTATION_SECONDS)
 
 if __name__ == '__main__':
     asyncio.run(main())
